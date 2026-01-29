@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevOps Task 1</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container { max-width: 480px; width: 100%; padding: 2rem; }
+    h1 { font-size: 1.75rem; color: #38bdf8; margin-bottom: 0.5rem; }
+    p.subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 0.875rem; }
+    .cards { display: flex; flex-direction: column; gap: 0.75rem; }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card .label { color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; }
+    .card .value { font-weight: 600; font-size: 1rem; }
+    .ok { color: #4ade80; }
+    .err { color: #f87171; }
+    .loading { color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>DevOps Task 1</h1>
+    <p class="subtitle">Express + Bun + Docker + PostgreSQL</p>
+    <div class="cards">
+      <div class="card">
+        <span class="label">Status</span>
+        <span class="value loading" id="status">...</span>
+      </div>
+      <div class="card">
+        <span class="label">Database</span>
+        <span class="value loading" id="db">...</span>
+      </div>
+      <div class="card">
+        <span class="label">Environment</span>
+        <span class="value loading" id="env">...</span>
+      </div>
+      <div class="card">
+        <span class="label">Greeting</span>
+        <span class="value loading" id="hello">...</span>
+      </div>
+    </div>
+  </div>
+  <script>
+    async function load() {
+      try {
+        const res = await fetch("/health-check");
+        const data = await res.json();
+        set("status", data.status, data.status === "OK");
+        set("db", data.database, data.database === "connected");
+        set("env", data.environment, true);
+      } catch {
+        set("status", "Unreachable", false);
+        set("db", "Unknown", false);
+        set("env", "Unknown", false);
+      }
+      try {
+        const res = await fetch("/hello-world");
+        const text = await res.text();
+        set("hello", text, true);
+      } catch {
+        set("hello", "Unavailable", false);
+      }
+    }
+    function set(id, text, ok) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = "value " + (ok ? "ok" : "err");
+    }
+    load();
+  </script>
+</body>
+</html>

@@ -1,12 +1,35 @@
 services:
   app:
+    container_name: devops-task-1
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
-      - PORT=8000
       - SERVER_HELLO=Hello from Docker!
+    volumes:
+      - app-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "bun", "--eval", "fetch('http://localhost:8000/health-check').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+    labels:
+      - "app.name=devops-task-1"
+      - "app.description=Express HTTP Server"
+      - "app.port=8000"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     restart: unless-stopped
+    init: true
+
+volumes:
+  app-logs:
