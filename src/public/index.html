@@ -82,7 +82,7 @@
     function set(id, text, ok) {
       const el = document.getElementById(id);
       el.textContent = text;
-      el.className = "value " + (ok ? "ok" : "err");
+      el.className = `value ${ok ? "ok" : "err"}`;
     }
     load();
   </script>
