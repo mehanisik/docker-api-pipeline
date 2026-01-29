@@ -1,116 +1,97 @@
-# Task1 - HTTP Server
+# DevOps Task 1
 
-Simple Express server with health check and hello world endpoints.
+Simple Express HTTP server running on Bun, packaged as a Docker container with GitHub Actions CI/CD.
 
-## Prerequisites
+## Endpoints
 
-- [Bun](https://bun.sh/) (recommended) or [Node.js](https://nodejs.org/) v18+
+| Route | Description |
+|---|---|
+| `GET /health-check` | Returns `{"status": "ok"}` |
+| `GET /hello-world` | Returns the `SERVER_HELLO` env variable |
+| `GET /home` | Optional dashboard UI |
 
-## Setup
+## Quick Start
 
-### Clone the repository
-
-```bash
-git clone https://github.com/mehanisik/docker-api-pipeline.git
-cd docker-api-pipeline
-```
-
-### Install dependencies
-
-**Using Bun (recommended):**
+### Local development
 
 ```bash
 bun install
-```
-
-**Using npm:**
-
-```bash
-npm install
-```
-
-### Configure environment
-
-Copy the example environment file and adjust values if needed:
-
-```bash
 cp .env.example .env
-```
-
-Default values:
-
-```
-PORT=8000
-HOST=localhost
-NODE_ENV=development
-SERVER_HELLO=Hello World
-```
-
-## Run the application
-
-**Using Bun:**
-
-```bash
 bun run dev
 ```
 
-**Using npm:**
+### Docker
+
+Build and run with a single command:
 
 ```bash
-npx tsx src/index.ts
+docker compose up --build -d
 ```
 
-The server will start at `http://localhost:8000`
+The server starts at `http://localhost:8000`.
 
-## API Endpoints
-
-### Health Check
+Stop everything:
 
 ```bash
-curl http://localhost:8000/health-check
+docker compose down
 ```
 
-Response:
+## Environment Variables
 
-```json
-{
-  "status": "OK",
-  "timestamp": "2026-01-27T12:00:00.000Z",
-  "environment": "development",
-  "version": "v24.3.0"
-}
-```
-
-### Hello World
-
-```bash
-curl http://localhost:8000/hello-world
-```
-
-Response:
-
-```
-Hello World
-```
-
-The message is configurable via the `SERVER_HELLO` environment variable.
-
-### Root
-
-```bash
-curl http://localhost:8000/
-```
-
-Response:
-
-```
-Hello World!
-```
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `8000` | Server port |
+| `HOST` | `localhost` | Server host |
+| `NODE_ENV` | `development` | Environment mode |
+| `SERVER_HELLO` | `Hello World!` | Message for `/hello-world` |
+| `DATABASE_URL` | - | PostgreSQL connection string |
 
 ## Scripts
 
-| Command          | Description              |
-| ---------------- | ------------------------ |
-| `bun run dev`    | Start development server |
-| `bun run lint`   | Run Biome linter         |
-| `bun run format` | Format code with Biome   |
+| Command | Description |
+|---|---|
+| `bun run dev` | Start development server |
+| `bun run lint` | Lint and fix with Biome |
+| `bun run lint:check` | Lint without fixing (CI) |
+| `bun run format` | Format and fix with Biome |
+| `bun run format:check` | Format check without fixing (CI) |
+
+## CI/CD Pipelines
+
+### Build Pipeline (`build.yml`)
+
+Triggers on push to `main` when `src/**`, `Dockerfile`, `package.json`, or `bun.lock` change.
+
+Steps:
+1. Checks out the code
+2. Logs in to GitHub Container Registry (GHCR)
+3. Builds the Docker image
+4. Pushes with `latest` and git SHA tags
+
+### Code Quality Pipeline (`code-quality.yml`)
+
+Triggers on pull requests to `main`.
+
+Steps:
+1. Installs Bun and dependencies
+2. Runs Biome lint check
+3. Runs Biome format check
+
+## Docker Details
+
+The Dockerfile uses a multi-stage build:
+
+- **base** - Sets up Bun with the working directory
+- **install** - Installs production dependencies only
+- **release** - Slim image with non-root `bun` user, health check, and OCI labels
+
+The container runs as a non-root user and includes a built-in health check that pings `/health-check` every 30 seconds.
+
+## Tech Stack
+
+- [Bun](https://bun.sh/) - Runtime
+- [Express](https://expressjs.com/) - HTTP framework
+- [Helmet](https://helmetjs.github.io/) - Security headers
+- [Pino](https://getpino.io/) - Logging
+- [Biome](https://biomejs.dev/) - Linting and formatting
+- [PostgreSQL](https://www.postgresql.org/) - Database (via [Neon](https://neon.tech/))
