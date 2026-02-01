@@ -83,10 +83,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  deploy-staging:
+  deploy-dev:
     needs: build
     runs-on: ubuntu-latest
-    environment: staging
+    environment: dev
     permissions:
       contents: read
       id-token: write
@@ -97,10 +97,10 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-      - name: Deploy to Cloud Run (staging)
+      - name: Deploy to Cloud Run (dev)
         uses: google-github-actions/deploy-cloudrun@v2
         with:
-          service: ${{ env.SERVICE_NAME }}-staging
+          service: ${{ env.SERVICE_NAME }}-dev
           region: ${{ env.GCP_REGION }}
           image: ${{ env.AR_IMAGE }}:${{ needs.build.outputs.image_tag }}
           flags: |
@@ -111,7 +111,7 @@ jobs:
             --allow-unauthenticated
 
   deploy-production:
-    needs: [deploy-staging, build]
+    needs: [deploy-dev, build]
     runs-on: ubuntu-latest
     environment: production
     permissions:
