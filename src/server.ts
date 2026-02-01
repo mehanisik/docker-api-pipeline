@@ -1,12 +1,11 @@
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express, { type Express, type Request, type Response } from "express";
+import swaggerUi from "swagger-ui-express";
 
-import { pino } from "pino";
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { logger } from "./logger";
+import { requestLogger } from "./middleware/request-logger";
+import { swaggerSpec } from "./swagger";
 
-const logger = pino({ name: "server start" });
 const app: Express = express();
 
 app.set("trust proxy", true);
@@ -14,8 +13,9 @@ app.set("trust proxy", true);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: process.env.CORS_ORIGIN || "*", credentials: true }));
+app.use(requestLogger);
 
-app.use("/api", express.static(join(__dirname, "public")));
+app.use("/api", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/health-check", (_req: Request, res: Response) => {
 	res.json({ status: "ok" });

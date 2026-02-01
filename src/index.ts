@@ -1,3 +1,4 @@
+import "./tracing";
 import "dotenv/config";
 import * as db from "./db";
 import { app, logger } from "./server";

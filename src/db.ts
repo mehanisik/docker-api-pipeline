@@ -1,7 +1,5 @@
 import pg from "pg";
-import { pino } from "pino";
-
-const logger = pino({ name: "database" });
+import { logger } from "./logger";
 
 const pool = new pg.Pool({
 	connectionString: process.env.DATABASE_URL,

@@ -19,6 +19,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write
 
     steps:
       - name: Checkout
@@ -39,6 +40,22 @@ jobs:
           tags: |
             type=raw,value=latest
             type=sha,prefix=
+
+      - name: Build image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          push: false
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:scan
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:scan
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
 
       - name: Build and push
         uses: docker/build-push-action@v6
