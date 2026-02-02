@@ -21,9 +21,12 @@ app.get("/health-check", (_req: Request, res: Response) => {
 	res.json({ status: "ok" });
 });
 
-app.get("/hello-world", (_req: Request, res: Response) => {
-	const message = process.env.SERVER_HELLO || "Hello World!";
-	res.send(message);
+app.get("/version", (_req: Request, res: Response) => {
+	res.json({
+		commit: process.env.BUILD_SHA || "unknown",
+		bun: Bun.version,
+		node: process.version,
+	});
 });
 
 export { app, logger };

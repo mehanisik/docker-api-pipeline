@@ -27,16 +27,23 @@ export const swaggerSpec = {
 				},
 			},
 		},
-		"/hello-world": {
+		"/version": {
 			get: {
-				summary: "SERVER_HELLO env value",
-				operationId: "helloWorld",
+				summary: "Build and runtime version info",
+				operationId: "version",
 				responses: {
 					"200": {
-						description: "Returns the SERVER_HELLO environment variable value",
+						description: "Returns build commit SHA and runtime versions",
 						content: {
-							"text/plain": {
-								schema: { type: "string", example: "Hello World!" },
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										commit: { type: "string", example: "a1b2c3d" },
+										bun: { type: "string", example: "1.3.8" },
+										node: { type: "string", example: "v22.0.0" },
+									},
+								},
 							},
 						},
 					},

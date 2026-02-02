@@ -7,7 +7,7 @@ Simple Express HTTP server running on Bun, packaged as a Docker container with G
 | Route               | Description                             |
 | ------------------- | --------------------------------------- |
 | `GET /health-check` | Returns `{"status": "ok"}`              |
-| `GET /hello-world`  | Returns the `SERVER_HELLO` env variable |
+| `GET /version`      | Returns build SHA and runtime versions  |
 | `GET /api`          | API explorer UI                         |
 
 ## Quick Start
@@ -43,7 +43,6 @@ docker compose down
 | `PORT`         | `8000`         | Server port                  |
 | `HOST`         | `localhost`    | Server host                  |
 | `NODE_ENV`     | `development`  | Environment mode             |
-| `SERVER_HELLO` | `Hello World!` | Message for `/hello-world`   |
 | `DATABASE_URL` | -              | PostgreSQL connection string |
 
 ## Scripts
@@ -58,26 +57,22 @@ docker compose down
 
 ## CI/CD Pipelines
 
-### Build Pipeline (`build.yml`)
-
-Triggers on push to `main` when `src/**`, `Dockerfile`, `package.json`, or `bun.lock` change.
-
-Steps:
-
-1. Checks out the code
-2. Logs in to GitHub Container Registry (GHCR)
-3. Builds the Docker image
-4. Pushes with `latest` and git SHA tags
-
-### Code Quality Pipeline (`code-quality.yml`)
+### Code Quality (`code-quality.yml`)
 
 Triggers on pull requests to `main`.
-
-Steps:
 
 1. Installs Bun and dependencies
 2. Runs Biome lint check
 3. Runs Biome format check
+
+### Deploy (`deploy.yml`)
+
+Triggers on push to `main`.
+
+1. Runs lint, format check, and tests
+2. Builds Docker image and scans with Trivy
+3. Pushes to GCP Artifact Registry (tagged by git SHA)
+4. Deploys to Cloud Run (dev, then production)
 
 ## Docker Details
 

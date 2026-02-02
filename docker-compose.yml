@@ -10,7 +10,6 @@ services:
       - .env
     environment:
       - NODE_ENV=production
-      - SERVER_HELLO=Hello from Docker!
     volumes:
       - app-logs:/app/logs
     healthcheck:
