@@ -1,17 +1,26 @@
-# DevOps Task 1
+# BuildBox API
 
-Simple Express HTTP server running on Bun, packaged as a Docker container with GitHub Actions CI/CD.
+Express HTTP server running on Bun, packaged as a Docker container with GitHub Actions CI/CD pipeline deploying to GCP Cloud Run.
 
-## Endpoints
+Part of the [buildbox-lab](https://github.com/buildbox-lab) organization.
 
-| Route               | Description                             |
-| ------------------- | --------------------------------------- |
-| `GET /health-check` | Returns `{"status": "ok"}`              |
-| `GET /api`          | API explorer UI                         |
+## Live Endpoints
+
+| Environment | URL |
+| ----------- | --- |
+| Production  | https://buildbox-api-482567119401.europe-west1.run.app |
+| Development | https://buildbox-api-dev-482567119401.europe-west1.run.app |
+
+## API Routes
+
+| Route               | Description          |
+| ------------------- | -------------------- |
+| `GET /health-check` | Returns `{"status": "ok"}` |
+| `GET /api`          | Swagger API explorer |
 
 ## Quick Start
 
-### Local development
+### Local Development
 
 ```bash
 bun install
@@ -21,15 +30,11 @@ bun run dev
 
 ### Docker
 
-Build and run with a single command:
-
 ```bash
 docker compose up --build -d
 ```
 
-The server starts at `http://localhost:8000`.
-
-Stop everything:
+Server starts at `http://localhost:8000`.
 
 ```bash
 docker compose down
@@ -37,58 +42,46 @@ docker compose down
 
 ## Environment Variables
 
-| Variable       | Default        | Description                  |
-| -------------- | -------------- | ---------------------------- |
-| `PORT`         | `8000`         | Server port                  |
-| `HOST`         | `localhost`    | Server host                  |
-| `NODE_ENV`     | `development`  | Environment mode             |
-| `DATABASE_URL` | -              | PostgreSQL connection string |
+| Variable       | Default       | Description                  |
+| -------------- | ------------- | ---------------------------- |
+| `PORT`         | `8000`        | Server port                  |
+| `HOST`         | `localhost`   | Server host                  |
+| `NODE_ENV`     | `development` | Environment mode             |
+| `DATABASE_URL` | -             | PostgreSQL connection string |
 
 ## Scripts
 
-| Command                | Description                      |
-| ---------------------- | -------------------------------- |
-| `bun run dev`          | Start development server         |
-| `bun run lint`         | Lint and fix with Biome          |
-| `bun run lint:check`   | Lint without fixing (CI)         |
-| `bun run format`       | Format and fix with Biome        |
-| `bun run format:check` | Format check without fixing (CI) |
+| Command                | Description              |
+| ---------------------- | ------------------------ |
+| `bun run dev`          | Start development server |
+| `bun run lint`         | Lint and fix with Biome  |
+| `bun run lint:check`   | Lint check (CI)          |
+| `bun run format`       | Format with Biome        |
+| `bun run format:check` | Format check (CI)        |
+| `bun test`             | Run tests                |
 
-## CI/CD Pipelines
+## CI/CD
 
 ### Code Quality (`code-quality.yml`)
 
-Triggers on pull requests to `main`.
-
-1. Installs Bun and dependencies
-2. Runs Biome lint check
-3. Runs Biome format check
+Runs on pull requests to `main`:
+- Biome lint check
+- Biome format check
 
 ### Deploy (`deploy.yml`)
 
-Triggers on push to `main`.
-
-1. Runs lint, format check, and tests
-2. Builds Docker image and scans with Trivy
-3. Pushes to GCP Artifact Registry (tagged by git SHA)
-4. Deploys to Cloud Run (dev, then production)
-
-## Docker Details
-
-The Dockerfile uses a multi-stage build:
-
-- **base** - Sets up Bun with the working directory
-- **install** - Installs production dependencies only
-- **release** - Slim image with non-root `bun` user, health check, and OCI labels
-
-The container runs as a non-root user and includes a built-in health check that pings `/health-check` every 30 seconds.
+Runs on push to `main`:
+1. Test (lint, format, unit tests)
+2. Build Docker image and scan with Trivy
+3. Push to GCP Artifact Registry
+4. Deploy to Cloud Run (dev -> production)
 
 ## Tech Stack
 
 - [Bun](https://bun.sh/) - Runtime
 - [Express](https://expressjs.com/) - HTTP framework
-
 - [Pino](https://getpino.io/) - Logging
-- [Biome](https://biomejs.dev/) - Linting and formatting
-- [PostgreSQL](https://www.postgresql.org/) - Database (via [Neon](https://neon.tech/))
-- Lefthook commit added
+- [Biome](https://biomejs.dev/) - Linting/formatting
+- [Lefthook](https://github.com/evilmartians/lefthook) - Git hooks
+- [PostgreSQL](https://www.postgresql.org/) - Database
+- [GCP Cloud Run](https://cloud.google.com/run) - Hosting
