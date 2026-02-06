@@ -64,8 +64,12 @@ async function getHealthInfo(): Promise<{
 
 		const services: Record<string, string> = {};
 		for (const [name, endpoints] of Object.entries(result.services ?? {})) {
-			const states = (endpoints as Array<{ state: number }>).map((e) => e.state);
-			services[name] = states.every((s) => s === couchbase.PingState.Ok) ? "ok" : "degraded";
+			const states = (endpoints as Array<{ state: number }>).map(
+				(e) => e.state,
+			);
+			services[name] = states.every((s) => s === couchbase.PingState.Ok)
+				? "ok"
+				: "degraded";
 		}
 
 		const connected = Object.values(services).some((s) => s === "ok");
@@ -104,7 +108,10 @@ async function getClusterInfo(): Promise<Record<string, unknown>> {
 			),
 		};
 	} catch {
-		return { configured: true, error: "Failed to retrieve cluster diagnostics" };
+		return {
+			configured: true,
+			error: "Failed to retrieve cluster diagnostics",
+		};
 	}
 }
 
@@ -117,4 +124,12 @@ async function close(): Promise<void> {
 	}
 }
 
-export { initialize, checkConnection, getHealthInfo, getClusterInfo, close, bucket, cluster };
+export {
+	initialize,
+	checkConnection,
+	getHealthInfo,
+	getClusterInfo,
+	close,
+	bucket,
+	cluster,
+};

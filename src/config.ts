@@ -29,8 +29,15 @@ function validateEnv(): Config {
 		);
 	}
 
-	if (!couchbaseUrl || !couchbaseUsername || !couchbasePassword || !couchbaseBucket) {
-		warnings.push("Couchbase not configured - database features will be disabled");
+	if (
+		!couchbaseUrl ||
+		!couchbaseUsername ||
+		!couchbasePassword ||
+		!couchbaseBucket
+	) {
+		warnings.push(
+			"Couchbase not configured - database features will be disabled",
+		);
 	}
 
 	const corsOrigins = corsOrigin

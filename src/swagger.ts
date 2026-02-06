@@ -59,7 +59,11 @@ export const swaggerSpec = {
 									type: "object",
 									properties: {
 										connected: { type: "boolean", example: false },
-										latencyMs: { type: "number", nullable: true, example: null },
+										latencyMs: {
+											type: "number",
+											nullable: true,
+											example: null,
+										},
 										services: { type: "object", example: {} },
 									},
 								},
